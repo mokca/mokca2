@@ -1,0 +1,9 @@
+fetch_cosmic.pl # check 45 secs
+create_and_import_gene_list.pl # check 10 secs
+create_and_import_cosmic.pl # check 53 mins
+# fetch_cosmic_fasta.pl # NO LONGER DONE - FETCH TGZ MANUALLY with  wget -N -P ../data ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/fasta.tgz
+fetch_uniprot.pl # check 261 mins
+create_shared_tables.pl # check < 1 min
+# Hmm, delete old split files?
+split_uniprot_xml.pl # check 134 mins
+parse_uniprot_chunkily.pl # XXX (on each chunk in dir) XXX Check???

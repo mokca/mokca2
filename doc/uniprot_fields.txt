@@ -1,0 +1,30 @@
+Accession(s)
+Name					11 UC chars (SwissProt) 12 UC alnum (trembl)
+Recommended name			Max 80? chars	
+ - alternative names			0-n 80? chars
+Gene name				Max 16? chars
+ - synonyms				0-n Max 16? chars
+Annotation
+ - function				Free text?
+ - catalytic activity			More than one record possible!
+ - cofactor				More than one record possible!
+ - enzyme regulation			Free text
+ - subcellular location			More than one record possible!
+ - tissue specificity			Free text
+Sequence annotation
+ - molecule processing			?
+ - sites				?
+ - amino acid modifications		?
+ - experimental info? mutagenesis only	?
+Cross references
+ - RefSeq				More than one: 14 alnum. 'id', 14(+?) nucleotide sequence id
+ - PDBe					More than one: 4 alnum 'id', 5(+?) 'method', 6(+?) resolution, 32+ish 'chains'
+ - Ensembl				More than one: transcript, protein, gene; 15 alnum
+ - KEGG					13(+?) alnum
+ - GeneID				9(+?) num
+ - HGNC					10(+?) alnum
+ - MIM					More than one - gene, phenotype etc. 6(+?) numeric
+ - Pathway_Interaction_DB		More than one; 32+ish alnum 'id', 64+ish 'name'
+ - Reactome				More than one; 12(+?) alnum 'id', 16+ish 'name
+ - ChEMBL				13(+?) alnum
+ - DrugBank				More than one; 7 alnum 'id', 32+ish 'name'
