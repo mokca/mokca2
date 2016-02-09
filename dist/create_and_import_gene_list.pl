@@ -49,7 +49,7 @@ $dbq_create->execute;
 
 # Open CosmicHGNC file
 
-my $cosmic_fn = $mokcatanic_data_root . "/CosmicHGNC_" . $cosmic_release . ".tsv.gz";
+my $cosmic_fn = $mokcatanic_data_root . "/CosmicHGNC.tsv.gz";
 
 open(HGNC, "gzip -dc < $cosmic_fn |") || die "\n+++ Cannot open $cosmic_fn to read gene data: $!\n";
 

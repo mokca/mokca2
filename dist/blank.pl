@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 
+use strict;
+
 use Getopt::Long;
 use FileHandle;
 use DBI();
@@ -21,8 +23,8 @@ print STDERR "::: Blank - I haven't edited this because I am a naughty boy\n";
 
 # Setup universal paths, database details
 
-do "path_setup.pl";
-do "database_setup.pl";
+use path_setup;
+use database_setup;
 
 # Connect to databases
 
@@ -31,3 +33,22 @@ my $dbh_titanic = DBI->connect("DBI:mysql:database=$mokca_db;host=$mokca_host",$
 # Prepare queries
 
 # Go
+
+while (<>) {
+    
+    # Pointless ticker
+    
+    if ($tick_c % $tick_step == 0) {
+        print STDERR $tick_char;
+        if ($tick_c % ($tick_step * $col_wrap) == 0 && $tick_c) {
+            print STDERR "\n";
+        }
+    }
+    $tick_c++;
+}
+
+# Tick finish
+
+print STDERR "\n";
+
+$dbh_titanic->disconnect;

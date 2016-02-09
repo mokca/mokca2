@@ -56,6 +56,7 @@ my $dbq_drugbank_insert = $dbh_titanic->prepare(q{INSERT INTO uniprot_drugbank V
 my $dbq_refseq_insert = $dbh_titanic->prepare(q{INSERT INTO uniprot_refseq VALUES(?,?,?)});
 my $dbq_uniprot_update = $dbh_titanic->prepare(q{UPDATE uniprot SET recommended_name = ?, alternative_name_count = ?, submitted_name_count = ?, gene_name = ?, gene_synonym_count = ?, refseq_count = ?, pdb_count = ?,mim_count = ?, pid_count=?, reactome_count=?, drugbank_count=?, ensembl_count=?, go_count = ?, hgnc_numeric = ?, hgnc_name = ?, isoform_count = ?,
     kegg = ?, geneid = ?, chembl = ? WHERE uniprot_id = ?});
+my $dbq_add_accession = $dbh_titanic->prepare(q{INSERT INTO uniprot_accession VALUES(?,?)});
 
 # Open chunk
 
@@ -125,6 +126,15 @@ sub uniprot_entry {
     $dbq_fetch_id->execute($accession);
     ( my $uniprot_id ) = $dbq_fetch_id->fetchrow_array;
     $dbq_fetch_id->finish;
+    
+    # To cope with entries having multiple accessions, add all accessions (or
+    # the only accession) to linked table of accessions
+    
+    my @accessions = $entry->children('accession');
+    foreach my $accession_child (@accessions) {
+        my $multi_accession = $accession_child->text;
+        $dbq_add_accession->execute($uniprot_id, $multi_accession);
+    }
     
     # Get alternative names, submitted names, add to tables linked to uniprot_id
     # Make recommended name first submitted name if missing

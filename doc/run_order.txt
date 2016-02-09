@@ -1,9 +1,24 @@
-fetch_cosmic.pl # check 45 secs
+a# fetch_cosmic.pl # AAAAARGH, broken login controls, no version numbers, do manually
 create_and_import_gene_list.pl # check 10 secs
-create_and_import_cosmic.pl # check 53 mins
+create_and_import_cosmic.pl # check 53 mins/68 mins/74 mins/110mins+crash terminal/245mins
 # fetch_cosmic_fasta.pl # NO LONGER DONE - FETCH TGZ MANUALLY with  wget -N -P ../data ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/fasta.tgz
-fetch_uniprot.pl # check 261 mins
+fetch_uniprot.pl # check 261 mins/several hours (slow connection)
 create_shared_tables.pl # check < 1 min
 # Hmm, delete old split files?
-split_uniprot_xml.pl # check 134 mins
-parse_uniprot_chunkily.pl # XXX (on each chunk in dir) XXX Check???
+split_uniprot_xml.pl # check 134 mins/149 mins
+parse_uniprot_chunkily.pl # XXX (on each chunk in dir) XXX Check??? 30 mins
+import_uniprot_sequences.pl # check 723 mins
+import_cosmic_sequences.pl # check 6 mins
+fetch_biomart_web.pl # check 55 secs
+map_cosmic_to_uniprot.pl # check 45 minutes, 87% coverage
+# create_uniprot_blast_db.pl ? I guess - this wasnÕt here, I assume it should be ?
+blast_cosmic_to_uniprot.pl # check 98mins
+aggregate_cosmic_mutations.pl # check - takes forever, 94 mins
+generate_agg_sites.pl # check - still going after a week, 990 mins
+enumerate_domains.pl # check - 604mins, 639mins
+assign_aggregate_membership.pl # check - 96 mins
+# Manually download UniRef90 (uniref90.fasta.gz), PDB sequences (pdb_seqres.txt)
+# Merge to give uniref_pdb.txt
+# Run through pfilt to give uniref_pdb_pfilt.txt
+# Create BLAST+ database with makeblastdb
+import_pdb.pl # Check - ?

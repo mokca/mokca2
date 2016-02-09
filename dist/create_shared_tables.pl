@@ -51,6 +51,12 @@ my $dbq_create_uniprot = $dbh_titanic->prepare(q{CREATE TABLE uniprot(
 	PRIMARY KEY (uniprot_id),
     KEY (accession))});
 
+my $dbq_drop_uniprot_accession = $dbh_titanic->prepare(q{DROP TABLE IF EXISTS uniprot_accession});
+my $dbq_create_uniprot_accession = $dbh_titanic->prepare(q{CREATE TABLE uniprot_accession (
+    uniprot_id INT UNSIGNED NOT NULL,
+    accession VARCHAR(10),
+    KEY(uniprot_id))});
+
 my $dbq_drop_uniprot_alternative_name = $dbh_titanic->prepare(q{DROP TABLE IF EXISTS uniprot_alternative_name});
 my $dbq_create_uniprot_alternative_name = $dbh_titanic->prepare(q{CREATE TABLE uniprot_alternative_name(
     uniprot_id INT UNSIGNED NOT NULL,
@@ -139,6 +145,7 @@ my $dbq_create_sequence = $dbh_titanic->prepare(q{CREATE TABLE sequence (
 	source ENUM('uniprot','cosmic', 'pdb'),
 	source_id INT UNSIGNED NOT NULL,
 	isoform INT UNSIGNED,
+    codes_for ENUM('gene','protein'),
 	sequence TEXT,
 	sequence_md5 VARCHAR(32),
 	PRIMARY KEY (sequence_id))});
@@ -146,22 +153,114 @@ my $dbq_create_sequence = $dbh_titanic->prepare(q{CREATE TABLE sequence (
 my $dbq_drop_domain_map = $dbh_titanic->prepare(q{DROP TABLE IF EXISTS domain_map});
 my $dbq_create_domain_map = $dbh_titanic->prepare(q{CREATE TABLE domain_map (
     aggregate_id INT UNSIGNED NOT NULL,
-	cosmic_id INT UNSIGNED NOT NULL,
-	domain_type ENUM ('pfam_A', 'pfam_B', 'smart', 'prosite', 'other'),																 
-	domain_acc VARCHAR(16),
-	domain_name VARCHAR(16),
-	domain_id INT,
-	pfam_start INT,
-	pfam_end INT,
-	seq_start INT,
-	seq_end INT,
-	KEY (aggregate_id)
+    uniprot_domain_id INT UNSIGNED NOT NULL,
+	KEY (aggregate_id),
+    KEY (uniprot_domain_id)
 	)});
+
+my $dbq_drop_cvu = $dbh_titanic->prepare(q{DROP TABLE IF EXISTS cosmic_vs_uniprot});
+my $dbq_create_cvu = $dbh_titanic->prepare(q{CREATE TABLE cosmic_vs_uniprot (
+    cosmic_id INT UNSIGNED NOT NULL,
+    uniprot_id INT UNSIGNED,
+    identity double,
+    PRIMARY KEY (cosmic_id))});
+
+my $dbq_drop_alignment_mapping = $dbh_titanic->prepare(q{DROP TABLE IF EXISTS alignment_mapping});
+my $dbq_create_alignment_mapping = $dbh_titanic->prepare(q{CREATE TABLE alignment_mapping(
+    query_db enum('cosmic','uniprot','domain','pdb') default NULL,
+    hit_db enum('cosmic','uniprot','domain','pdb') default NULL,
+    query_id int(10) unsigned default NULL,
+    hit_id int(10) unsigned default NULL,
+    query_pos int(10) unsigned default NULL,
+    hit_pos int(10) unsigned default NULL,
+    query_res char(1) default NULL,
+    hit_res char(1) default NULL,
+    gap enum('none','query','hit') default NULL,
+    KEY (query_db),
+    KEY (query_id)
+    )});
+
+my $dbq_drop_counts = $dbh_titanic->prepare(q{DROP TABLE IF EXISTS agg_sites});
+my $dbq_create_counts = $dbh_titanic->prepare(q{CREATE TABLE agg_sites(
+    aggregate_id INT UNSIGNED,
+    Agl INT UNSIGNED,
+    CNS INT UNSIGNED,
+    Eye INT UNSIGNED,
+    Mng INT UNSIGNED,
+    Pty INT UNSIGNED,
+    Adr INT UNSIGNED,
+    Pth INT UNSIGNED,
+    Sal INT UNSIGNED,
+    Thy INT UNSIGNED,
+    Bil INT UNSIGNED,
+    GIT INT UNSIGNED,
+    LIn INT UNSIGNED,
+    Oes INT UNSIGNED,
+    Pnc INT UNSIGNED,
+    SIn INT UNSIGNED,
+    Sto INT UNSIGNED,
+    UAT INT UNSIGNED,
+    Bon INT UNSIGNED,
+    Ski INT UNSIGNED,
+    SoT INT UNSIGNED,
+    Bre INT UNSIGNED,
+    Cvx INT UNSIGNED,
+    End INT UNSIGNED,
+    FTu INT UNSIGNED,
+    GTr INT UNSIGNED,
+    Ova INT UNSIGNED,
+    Pen INT UNSIGNED,
+    Pla INT UNSIGNED,
+    Pro INT UNSIGNED,
+    Tes INT UNSIGNED,
+    Vag INT UNSIGNED,
+    Vul INT UNSIGNED,
+    HLT INT UNSIGNED,
+    Thm INT UNSIGNED,
+    Kid INT UNSIGNED,
+    Lvr INT UNSIGNED,
+    Lng INT UNSIGNED,
+    Plr INT UNSIGNED,
+    UTr INT UNSIGNED,
+    oth INT UNSIGNED,
+    NS INT UNSIGNED,
+    PRIMARY KEY (aggregate_id))});
+
+my $dbq_drop_aggmem = $dbh_titanic->prepare(q{DROP TABLE IF EXISTS aggregate_membership});
+my $dbq_create_aggmem = $dbh_titanic->prepare(q{CREATE TABLE aggregate_membership (
+    complete_id INT UNSIGNED,
+    aggregate_id INT UNSIGNED,
+    KEY(aggregate_id))});
+
+my $dbq_drop_uniprot_domain = $dbh_titanic->prepare(q{DROP TABLE IF EXISTS uniprot_domain});
+my $dbq_create_uniprot_domain = $dbh_titanic->prepare(q{CREATE TABLE uniprot_domain (
+    uniprot_domain_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    domain_type ENUM('pfam_A','pfam_B','inter'),
+    domain_acc VARCHAR(16),
+    domain_id VARCHAR(16),
+    uniprot_id INT UNSIGNED,
+    uniprot_start INT UNSIGNED,
+    uniprot_end INT UNSIGNED,
+    map_start INT UNSIGNED,
+    map_end INT UNSIGNED,
+    mutated INT UNSIGNED,
+    PRIMARY KEY (uniprot_domain_id),
+    KEY (uniprot_id))});
+
+my $dbq_drop_pdb = $dbh_titanic->prepare(q{DROP TABLE IF EXISTS pdb});
+my $dbq_create_pdb = $dbh_titanic->prepare(q{CREATE TABLE pdb (
+    pdb_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    pdb_code VARCHAR(4),
+    pdb_chain CHAR,
+    PRIMARY KEY (pdb_id))});
 
 # Drop/create tables
 
 $dbq_drop_uniprot->execute;
 $dbq_create_uniprot->execute;
+
+$dbq_drop_uniprot_accession->execute;
+$dbq_create_uniprot_accession->execute;
 
 $dbq_drop_uniprot_alternative_name->execute;
 $dbq_create_uniprot_alternative_name->execute;
@@ -201,6 +300,24 @@ $dbq_create_sequence->execute;
 
 $dbq_drop_domain_map->execute;
 $dbq_create_domain_map->execute;
+
+$dbq_drop_cvu->execute;
+$dbq_create_cvu->execute;
+
+$dbq_drop_alignment_mapping->execute;
+$dbq_create_alignment_mapping->execute;
+
+$dbq_drop_counts->execute;
+$dbq_create_counts->execute;
+
+$dbq_drop_aggmem->execute;
+$dbq_create_aggmem->execute;
+
+$dbq_drop_uniprot_domain->execute;
+$dbq_create_uniprot_domain->execute;
+
+$dbq_drop_pdb->execute;
+$dbq_create_pdb->execute;
 
 print STDERR "\n";
 

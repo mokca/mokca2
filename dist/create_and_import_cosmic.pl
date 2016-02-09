@@ -35,6 +35,7 @@ my $dbq_create = $dbh_titanic->prepare(q{CREATE TABLE cosmic_complete_export (
 											complete_id INT UNSIGNED NOT NULL AUTO_INCREMENT,
 											gene_name VARCHAR(48) DEFAULT '' NOT NULL,
 											accession_number VARCHAR(32) DEFAULT '' NOT NULL,
+                                            gene_cds_length INT UNSIGNED,
 											hgnc_id INT UNSIGNED,
 											sample_name VARCHAR(32) DEFAULT '',
 											id_sample INT UNSIGNED,
@@ -65,8 +66,11 @@ my $dbq_create = $dbh_titanic->prepare(q{CREATE TABLE cosmic_complete_export (
 											tumour_origin ENUM('NS','adenoma adjacent to primary tumour','hyperplasia adjacent to primary tumour',
 														'metastasis','primary','recurrent','secondary','surgery fresh/frozen'),
 											comments TEXT,
-											PRIMARY KEY (complete_id))});
-my $dbq_insert = $dbh_titanic->prepare(q{INSERT INTO cosmic_complete_export VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)});
+											PRIMARY KEY (complete_id),
+                                            KEY (gene_name),
+                                            KEY (mutation_aa),
+                                            KEY (mutation_description))});
+my $dbq_insert = $dbh_titanic->prepare(q{INSERT INTO cosmic_complete_export VALUES(NULL,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)});
 
 # Drop and create table
 
@@ -75,25 +79,26 @@ $dbq_create->execute;
 
 # Read CosmicCompleteExport file
 
-my $cosmic_fn = $mokcatanic_data_root . "/CosmicCompleteExport_" . $cosmic_release . ".tsv.gz";
+my $cosmic_fn = $mokcatanic_data_root . "/CosmicCompleteExport.tsv.gz";
 
 open(COSM, "gzip -dc < $cosmic_fn |") || die "\n+++ Cannot open $cosmic_fn to read complete export: $!\n";
 
 <COSM>; # Skip first line
 while (<COSM>) {
-	my $gene_name, $accession_number, $hgnc_id, $sample_name, $id_sample, $id_tumour, $primary_site, $site_subtype, $primary_histology, $histology_subtype, $genome_wide_screen,
+	my $gene_name, $accession_number, $gene_cds_length, $hgnc_id, $sample_name, $id_sample, $id_tumour, $primary_site, $site_subtype, $primary_histology, $histology_subtype, $genome_wide_screen,
 		$mutation_id, $mutation_cds, $mutation_aa, $mutation_description, $mutation_zygosity, $mutation_ncbi36_genome_position, $mutation_ncbi36_strand, $mutation_grch37_genome_position, $mutation_grch37_strand,
 		$mutation_somatic_status, $pubmed_pmid, $sample_source, $tumour_origin, $comments;
 	
 	chomp;
-	( $gene_name, $accession_number, $hgnc_id, $sample_name, $id_sample, $id_tumour, $primary_site, $site_subtype, $primary_histology, $histology_subtype, $genome_wide_screen,
+	( $gene_name, $accession_number, $gene_cds_length, $hgnc_id, $sample_name, $id_sample, $id_tumour, $primary_site, $site_subtype, $primary_histology, $histology_subtype, $genome_wide_screen,
 	$mutation_id, $mutation_cds, $mutation_aa, $mutation_description, $mutation_zygosity, $mutation_ncbi36_genome_position, $mutation_ncbi36_strand, $mutation_grch37_genome_position, $mutation_grch37_strand,
 	$mutation_somatic_status, $pubmed_pmid, $sample_source, $tumour_origin, $comments ) = split(/\t/);
 	
-	$dbq_insert->execute($gene_name, $accession_number, $hgnc_id, $sample_name, $id_sample, $id_tumour, $primary_site, $site_subtype, $primary_histology, $histology_subtype, $genome_wide_screen,
+	$dbq_insert->execute($gene_name, $accession_number, $gene_cds_length, $hgnc_id, $sample_name, $id_sample, $id_tumour, $primary_site, $site_subtype, $primary_histology, $histology_subtype, $genome_wide_screen,
 	$mutation_id, $mutation_cds, $mutation_aa, $mutation_description, $mutation_zygosity, $mutation_ncbi36_genome_position, $mutation_ncbi36_strand, $mutation_grch37_genome_position, $mutation_grch37_strand,
 	$mutation_somatic_status, $pubmed_pmid, $sample_source, $tumour_origin, $comments);
-	
+    $dbq_insert->finish;
+    
 	# Pointless ticker
 	
 	if ($tick_c % $tick_step == 0) {

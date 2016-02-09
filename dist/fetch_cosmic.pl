@@ -16,19 +16,21 @@ use path_setup;
 
 print STDERR "--- Fetch COSMIC files, release $cosmic_release\n";
 
-my $cosmic_fn = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicInsMutExport_" . $cosmic_release . ".tsv.gz";
+# Missing as of v71
+#
+#my $cosmic_fn = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicInsMutExport_" . $cosmic_release . ".tsv.gz";
+#
+#system("wget", $cosmic_fn, "-N", "-P", $mokcatanic_data_root) == 0 || die "+++Cannot fetch $cosmic_fn: $?\n";
+
+$cosmic_fn = "http://cancer.sanger.ac.uk/files/cosmic/" . $cosmic_release . "/CosmicCompleteExport.tsv.gz";
 
 system("wget", $cosmic_fn, "-N", "-P", $mokcatanic_data_root) == 0 || die "+++Cannot fetch $cosmic_fn: $?\n";
 
-$cosmic_fn = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicCompleteExport_" . $cosmic_release . ".tsv.gz";
+$cosmic_fn = "http://cancer.sanger.ac.uk/files/cosmic/" . $cosmic_release . "/CosmicMutantExport.tsv.gz";
 
 system("wget", $cosmic_fn, "-N", "-P", $mokcatanic_data_root) == 0 || die "+++Cannot fetch $cosmic_fn: $?\n";
 
-$cosmic_fn = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicMutantExport_" . $cosmic_release . ".tsv.gz";
-
-system("wget", $cosmic_fn, "-N", "-P", $mokcatanic_data_root) == 0 || die "+++Cannot fetch $cosmic_fn: $?\n";
-
-$cosmic_fn = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/CosmicHGNC_" . $cosmic_release . ".tsv.gz";
+$cosmic_fn = "http://cancer.sanger.ac.uk/files/cosmic/" . $cosmic_release . "/CosmicHGNC.tsv.gz";
 
 system("wget", $cosmic_fn, "-N", "-P", $mokcatanic_data_root) == 0 || die "+++Cannot fetch $cosmic_fn: $?\n";
 
@@ -39,6 +41,6 @@ system("wget", $cosmic_fn, "-N", "-P", $mokcatanic_data_root) == 0 || die "+++Ca
 #
 #system("wget", $cosmic_fn, "-N", "-P", $mokcatanic_data_root) == 0 || die "+++Cannot fetch $cosmic_fn: $?\n";
 
-$cosmic_fn = "ftp://ftp.sanger.ac.uk/pub/CGP/cosmic/data_export/cancer_gene_census.tsv";
+$cosmic_fn = "http://cancer.sanger.ac.uk/files/cosmic/" . $cosmic_release . "/cancer_gene_census.csv";
 
 system("wget", $cosmic_fn, "-N", "-P", $mokcatanic_data_root) == 0 || die "+++Cannot fetch $cosmic_fn: $?\n";
